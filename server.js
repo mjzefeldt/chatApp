@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 8080;
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 app.use(express.static(__dirname));
 app.use(bodyParser.json());
@@ -18,10 +20,16 @@ app.get('/messages', (req, res, next) => {
 });
 
 app.post('/messages', (req, res, next) => {
-    messages.push(req.body)
+    messages.push(req.body);
+    io.emit('message', req.body);
     res.sendStatus(200);
 });
 
-app.listen(PORT, () => {
+io.on('connection', (socket) => {
+    console.log('a user connected');
+});
+
+// replacing this with http listen instead so backend served by both Express and Socket.io
+http.listen(PORT, () => {
     console.log(`Listening on ${PORT}`);
 });
