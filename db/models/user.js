@@ -7,7 +7,6 @@ const User = db.define('user', {
     name: {
         type: STRING,
         allowNull: false,
-        unique: true
     },
     message: {
         type: TEXT

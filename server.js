@@ -23,16 +23,28 @@ app.get('/messages', async (req, res, next) => {
 });
 
 app.post('/messages', async (req, res, next) => {
+    // consider refactoring into helper function
+    const badwords = ['cuss', 'fowl', 'rotten'];
+    const shouldCensor = req.body.message.toLowerCase()
+        .split(' ')
+        .reduce((acc, cur) => {
+            if (badwords.includes(cur)) acc = true;
+            return acc;
+        }, false);
     try {
         await User.create(req.body);
-        io.emit('message', req.body);
+        const broadcast = shouldCensor ? { name: req.body.name, message: 'CENSORED' } : req.body;
+        io.emit('message', broadcast);
         res.sendStatus(200);
     }
     catch (err) {
         console.error(err);
         next(err);
     }
+
 });
+
+// implement error handling catch-all
 
 io.on('connection', (socket) => {
     console.log('a user connected');
