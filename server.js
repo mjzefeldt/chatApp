@@ -8,7 +8,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const db = require('./db');
 const { User } = require('./db/models');
-const { badWords } = require('./helper-functions/badwords')
+const { badWords } = require('./helper-functions/badwords') // helper function to censor message with bad words
 
 app.use(morgan('dev'));
 app.use(express.static(__dirname));
@@ -67,12 +67,14 @@ app.use((req, res, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log(`a user connected on socket: ${socket.id}`);
+    socket.on('disconnect', () => {
+        console.log(`a user has disconnected on socket: ${socket.id}`);
+    })
 });
 
 // replacing app.listen with http.listen instead so backend served by both Express and Socket.io
 db.sync(
-    { force: true }, //how to handle this? don't want to constantly empty db...
     console.log('db synced'))
     .then(() => {
         http.listen(PORT, () => {

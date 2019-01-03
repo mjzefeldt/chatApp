@@ -22,7 +22,6 @@ const badWords = function (message) {
     }, false);
 }
 
-
 module.exports = {
     badWords
 };
