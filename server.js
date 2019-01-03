@@ -22,10 +22,26 @@ app.get('/messages', async (req, res, next) => {
     }
 });
 
+app.get('/messages/:user', async (req, res, next) => {
+    try {
+        const messages = await User.findAll({
+            where: {
+                name: req.params.user
+            }
+        });
+        res.send(messages);
+    }
+    catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
+
 app.post('/messages', async (req, res, next) => {
     // consider refactoring into helper function
-    const badwords = ['cuss', 'fowl', 'rotten'];
-    const shouldCensor = req.body.message.toLowerCase()
+    const badwords = ['cuss', 'foul', 'rotten'];
+    const shouldCensor = req.body.message
+        .toLowerCase()
         .split(' ')
         .reduce((acc, cur) => {
             if (badwords.includes(cur)) acc = true;
@@ -51,7 +67,8 @@ io.on('connection', (socket) => {
 });
 
 // replacing app.listen with http.listen instead so backend served by both Express and Socket.io
-db.sync({ force: true },
+db.sync(
+    // { force: true }, how to handle this? don't want to constantly empty db...
     console.log('db synced'))
     .then(() => {
         http.listen(PORT, () => {
